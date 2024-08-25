@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wages List</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #343a40;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary, .btn-success {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        .table-container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            margin: 0;
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+        }
+
+        thead th {
+            background-color: #343a40;
+            color: #ffffff;
+            text-align: center;
+            font-weight: 600;
+            padding: 1rem;
+        }
+
+        tbody tr {
+            transition: background-color 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        tbody td {
+            padding: 0.8rem;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .btn-warning, .btn-danger {
+            border-radius: 25px;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .flash-message {
+            padding: 1rem;
+            border-radius: 8px;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .flash-message.success {
+            background-color: #28a745;
+        }
+
+        .flash-message.error {
+            background-color: #dc3545;
+        }
+
+        @media (max-width: 576px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .btn {
+                font-size: 0.9rem;
+            }
+
+            .table-container {
+                padding: 1rem;
+            }
+
+            thead th,
+            tbody td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container my-5">
+        <% if (success.length > 0 || error.length > 0) { %>
+            <div id="flash-message-container">
+                <% if (success.length > 0) { %>
+                    <div class="flash-message success">
+                        <%= success %>
+                    </div>
+                <% } %>
+                <% if (error.length > 0) { %>
+                    <div class="flash-message error">
+                        <%= error %>
+                    </div>
+                <% } %>
+            </div>
+            <script>
+                setTimeout(function () {
+                    const flashMessageContainer = document.getElementById('flash-message-container');
+                    if (flashMessageContainer) {
+                        flashMessageContainer.style.transition = 'opacity 0.5s ease-out';
+                        flashMessageContainer.style.opacity = '0';
+                        setTimeout(() => flashMessageContainer.remove(), 500);
+                    }
+                }, 3000);
+            </script>
+        <% } %>
+
+        <div class="text-center">
+            <h1>Spends Store</h1>
+        </div>
+
+        <div class="d-flex justify-content-center mb-4">
+            <a href="/" class="btn btn-primary mx-2">Back To Home</a>
+            <a href="/newspend" class="btn btn-success mx-2">Add Spends</a>
+        </div>
+
+        <div class="table-responsive table-container">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Spends ID</th>
+                        <th>Item Name</th>
+                        <th>Price</th>
+                        <th>Payment Mode</th>
+                        <th>Date</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(money of moneys) { %>
+                        <tr>
+                            <td><%= money.id %></td>
+                            <td><%= money.nameOfItem %></td>
+                            <td><%= money.price %></td>
+                            <td><%= money.paymentMode %></td>
+                            <td><%= money.date %></td>
+                            <td>
+                                <form action="/wage/<%= money.id %>/edit">
+                                    <button class="btn btn-warning">Edit</button>
+                                </form>
+                            </td>
+                            <td>
+                                <form method="post" action="/wage/<%= money.id %>?_method=DELETE"
+                                    onsubmit="return confirm('Are you sure you want to delete this spend?');">
+                                    <button class="btn btn-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

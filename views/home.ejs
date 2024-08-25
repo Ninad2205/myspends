@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin-top: 0px;
+            /* background-image: url('images/background.jpg'); Optional: Set a background image */
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+
+        .btncontainer {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn{
+            
+            font-size: 1.2rem;
+            background-color: #4ba2ff;
+            border: none;
+            
+            
+             border-radius: 25px;
+             color: #ffffff;
+            background-color: rgb(30, 186, 252);
+            width: 200px;
+            height: 50px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover{
+            background-color:rgb(3, 170, 242);
+            transform: scale(1.05);
+        }
+
+        .image-container {
+            
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .image-container img {
+            max-width: 300px;
+            height:100px;
+            border-radius: 15px;
+        }
+        .titleHome{
+            color: rgb(255, 122, 28);
+            font-size: 3rem;
+            font-family:'Courier New', Courier, monospace;
+            font-weight: bolder;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- <img src="https://img.freepik.com/premium-photo/smartphone-user-managing-expenses-with-finance-app-flat-vector-illustration_980716-488748.jpg?w=360" alt="Daily Wages" style="max-width: 100%; height: auto;"> -->
+    <div class="container text-center">
+        <div class="image-container">
+            <img src="https://img.freepik.com/premium-photo/smartphone-user-managing-expenses-with-finance-app-flat-vector-illustration_980716-488748.jpg?w=360" alt="Daily Wages" style="max-width: 100%; height: auto;">
+
+        </div>
+        <h1 class="titleHome">Spends Tracker</h1>
+        <div class="btncontainer">
+            <form action="http://localhost:4000/showAll">
+                <button type="submit" class="btn">Show All Spends</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>
