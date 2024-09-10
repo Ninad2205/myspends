@@ -214,100 +214,6 @@
 // });
 
 
-
-
-
-
-
-//modified code from chatgpt
-
-const express = require('express');
-const app = express();
-const port = 4000;
-const path = require("path");
-const session = require("express-session");
-const flash = require("connect-flash");
-const mysql = require('mysql2');
-const methodOverride = require("method-override");
-const cors = require('cors');  // Import the CORS module
-const bodyParser = require('body-parser');
-
-// Use method-override middleware
-app.use(methodOverride('_method'));
-
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-
-// Use environment variables for sensitive information
-require('dotenv').config();
-
-// Setup session options
-const sessionOptions = {
-    secret: process.env.SESSION_SECRET || "mysupersecretcode",
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-        expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-        httpOnly: true,
-    }
-};
-app.use(cors()); 
-// app.use(express.static('public'));
-
-
-// Middleware setup
-app.use(session(sessionOptions));
-app.use(flash());
-app.use(methodOverride("_method"));
-app.use(express.urlencoded({ extended: true }));
-
-app.use((req, res, next) => {
-    res.locals.success = req.flash("success");
-    res.locals.error = req.flash("error");
-    next();
-});
-
-// View engine and paths
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "/views"));
-
-// Database connection
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    database: 'dailyWage',
-    password: process.env.DB_PASSWORD,
-});
-
-connection.connect(err => {
-    if (err) {
-        console.error("Database connection failed:", err.stack);
-        return;
-    }
-    console.log("Connected to database.");
-});
-
-// Routes
-app.get("/", (req, res) => {
-    const q = "SELECT COUNT(*) AS count FROM money";
-    connection.query(q, (err, result) => {
-        if (err) {
-            console.log(err);
-            req.flash("error", "Error fetching data from database.");
-            return res.redirect("/error");
-        }
-        const count = result[0].count;
-        req.flash("success", "Wages retrieved successfully.");
-        res.render("signup.ejs", { count });
-    });
-});
-app.get("/testing",(req,res)=>{
-  res.send("Working...");
-});
-
-
-
 // app.get("/showAll", (req, res) => {
 //     const q = "SELECT * FROM money";
 //     connection.query(q, (err,moneys) => {
@@ -383,32 +289,194 @@ app.get("/testing",(req,res)=>{
 //     });
 // });
 
+
+
+
+
+
+
+
+const express = require('express');
+const app = express();
+const port = 4000;
+const path = require("path");
+const session = require("express-session");
+const flash = require("connect-flash");
+const mysql = require('mysql2');
+const methodOverride = require("method-override");
+const cors = require('cors');  // Import the CORS module
+const bodyParser = require('body-parser');
+const MySQLStore = require("express-mysql-session")(session);
+const bcrypt = require('bcrypt');
+
+
+// Use environment variables for sensitive information
+require('dotenv').config();
+
+// Use method-override middleware
+app.use(methodOverride('_method'));
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+
+
+// Database connection
+const connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    database: 'dailyWage',
+    password: process.env.DB_PASSWORD,
+});
+
+connection.connect(err => {
+    if (err) {
+        console.error("Database connection failed:", err.stack);
+        return;
+    }
+    console.log("Connected to database.");
+});
+
+
+//session store
+const sessionStore = new MySQLStore({}, connection);
+
+
+// Setup session options
+const sessionOptions = {
+    secret: process.env.SESSION_SECRET || "mysupersecretcode",
+    store:sessionStore,
+    resave: true,
+    saveUninitialized: true,
+    cookie: {
+        expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+        maxAge: 365 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        secure:false,
+    }
+};
+
+
+app.use(cors()); 
+// app.use(express.static('public'));
+
+
+// Middleware setup
+app.use(session(sessionOptions));
+app.use(flash());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(methodOverride('_method'));
+
+
+app.use(express.urlencoded({ extended: true }));
+
+app.use((req, res, next) => {
+    res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
+    next();
+});
+
+// View engine and paths
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "/views"));
+
+
+// Routes
+app.get("/", (req, res) => {
+    const q = "SELECT COUNT(*) AS count FROM money";
+    connection.query(q, (err, result) => {
+        if (err) {
+            console.log(err);
+            req.flash("error", "Error fetching data from database.");
+            return res.redirect("/error");
+        }
+        const count = result[0].count;
+        req.flash("success", "Wages retrieved successfully.");
+        res.render("signup.ejs", { count });
+    });
+});
+
+app.get("/testing",(req,res)=>{
+  res.send("Working...");
+});
+
+
+
 //user register
 app.get("/signup",(req,res)=>{
     res.render("signup.ejs");
 });
-app.post("/signup",(req,res)=>{
-    const { userId, username, password} = req.body;
-    const q = `INSERT INTO users(userId, username, password) VALUES (?, ?, ?)`;
-    connection.query(q, [ userId, username, password], (err) => {
-        if (err) {
-            console.log(err);
-            req.flash("error", "Error adding new spend to database.");
-            return res.redirect("/error");
-        }
-        req.flash("success", "New spend added successfully.");
-        res.redirect("/login");
-    });
+// app.post("/signup",(req,res)=>{
+//     const { userId, username, password} = req.body;
+//     const q = `INSERT INTO users(userId, username, password) VALUES (?, ?, ?)`;
+//     connection.query(q, [ userId, username, password], (err) => {
+//         if (err) {
+//             console.log(err);
+//             req.flash("error", "Error adding new spend to database.");
+//             return res.redirect("/error");
+//         }
+//         req.flash("success", "New spend added successfully.");
+//         res.redirect("/login");
+//     });
+// });
+
+
+app.post("/signup", async (req, res) => {
+    const { userId, username, password } = req.body;
+    try {
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        // Insert user with hashed password into the database
+        const q = `INSERT INTO users(userId, username, password) VALUES (?, ?, ?)`;
+        connection.query(q, [userId, username, hashedPassword], (err) => {
+            if (err) {
+                console.log(err);
+                req.flash("error", "Error adding new user to database.");
+                return res.redirect("/error");
+            }
+            
+            req.flash("success", "New user added successfully.");
+            res.redirect("/login");
+        });
+    } catch (err) {
+        console.error(err);
+        req.flash("error", "Error hashing password.");
+        res.redirect("/error");
+    }
 });
 
 
-//user authentication
-// Login Route
-app.post('/login', (req, res) => {
-    const { userId, password } = req.body;
-    const q = 'SELECT * FROM users WHERE userId = ? AND password = ?';
+
+// //user authentication
+// // Login Route
+// app.post('/login', (req, res) => {
+//     const { userId, password } = req.body;
+//     const q = 'SELECT * FROM users WHERE userId = ? AND password = ?';
     
-    connection.query(q, [userId, password], (err, results) => {
+//     connection.query(q, [userId, password], (err, results) => {
+//         if (err) {
+//             console.error(err);
+//             req.flash('error', 'Database error.');
+//             return res.redirect('/login');
+//         }
+
+//         if (results.length > 0) {
+//             req.session.userId = userId; // Store userId in session
+//             req.flash('success', 'Login successful.');
+//             res.redirect('/home'); // Redirect to home page
+//         } else {
+//             req.flash('error', 'Invalid User ID or Password.');
+//             res.redirect('/login');
+//         }
+//     });
+// });
+app.post('/login', async (req, res) => {
+    const { userId, password } = req.body;
+    const q = 'SELECT * FROM users WHERE userId = ?';
+
+    connection.query(q, [userId], async (err, results) => {
         if (err) {
             console.error(err);
             req.flash('error', 'Database error.');
@@ -416,15 +484,26 @@ app.post('/login', (req, res) => {
         }
 
         if (results.length > 0) {
-            req.session.userId = userId; // Store userId in session
-            req.flash('success', 'Login successful.');
-            res.redirect('/home'); // Redirect to home page
+            const storedHashedPassword = results[0].password;
+
+            // Compare the entered password with the hashed password
+            const match = await bcrypt.compare(password, storedHashedPassword);
+            if (match) {
+                req.session.userId = userId; // Store userId in session
+                req.flash('success', 'Login successful.');
+                res.redirect('/home');
+            } else {
+                req.flash('error', 'Invalid User ID or Password.');
+                res.redirect('/login');
+            }
         } else {
             req.flash('error', 'Invalid User ID or Password.');
             res.redirect('/login');
         }
     });
 });
+
+
 
 // Home Page Route
 app.get('/home', (req, res) => {
@@ -483,6 +562,84 @@ app.get('/dashboard', (req, res) => {
         res.render('dashboard.ejs', { items: results ,userId});
     });
 });
+
+// sum calculation
+// app.post('/calculate', (req, res) => {
+//     // Check if the user is logged in
+//     if (!req.session.userId) {
+//         req.flash("error", "You need to log in first.");
+//         return res.redirect('/login');
+//     }
+
+//     // Extract userId from session
+//     const userId = req.session.userId;
+
+//     // Extract date from query parameters
+//     const userDate = req.body.date ? req.body.date + '%' : null;
+
+//     if (!userDate) {
+//         req.flash('error', 'Please enter a valid date.');
+//         return res.redirect('/calculate'); // Ensure this does not cause a loop
+//     }
+
+//     // SQL query to get the sum of prices for the logged-in user for the specified month
+//     const q = 'SELECT SUM(price) AS total_spends FROM items WHERE userId = ? AND date LIKE ?;';
+
+// const sum= connection.query(q, [userId, userDate], (err, results) => {
+//         if (err) {
+//             console.error(err);
+//             req.flash('error', 'Error fetching data.');
+//             return res.redirect('/error');
+//         }
+
+//         // Render the sumSpends.ejs view with the total spends and userId
+//         // res.render('dashboard.ejs', { items: results, userId });
+//         res.send("Total Spends are: ",sum);
+//     });
+// });
+
+app.get("/calculateSpends",(req,res)=>{
+    // Check if the user is logged in
+    // const uid=req.session.userId;
+    if (!req.session.userId) {
+        req.flash("error", "You need to log in first.");
+        return res.redirect('/login');
+    }
+    const userId = req.session.userId;
+    res.render("sumSpends.ejs",{userId});
+});
+app.post('/calculateSpends', (req, res) => {
+    // Check if the user is logged in
+    if (!req.session.userId) {
+        req.flash("error", "You need to log in first.");
+        return res.redirect('/login');
+    }
+    const { userId, year, month } = req.body;
+    const monthYear = `${year}-${month}`;
+
+    const query = `
+        SELECT SUM(price) AS total_spends
+        FROM items
+        WHERE userId = ? 
+          AND DATE_FORMAT(date, '%Y-%m') = ?;
+    `;
+
+    connection.query(query, [userId, monthYear], (error, results) => {
+        if (error) {
+            console.error('Error executing query:', error);
+            return res.status(500).send('Internal Server Error');
+        }
+        const totalSpends = results[0].total_spends || 0;
+
+        // Pass the year, month, and totalSpends to the template
+        const userId = req.session.userId;
+
+        res.render('sumSpends', { year, month, totalSpends,userId });
+    });
+});
+
+
+
 
 
 // Render login page
@@ -585,6 +742,20 @@ app.patch("/item/:id", (req, res) => {
         res.redirect("/:id/showAll"); // Redirect to a page where the updated item is shown
     });
 });
+app.get("/logout", (req, res, next) => {
+    req.session.destroy(err => {
+        if (err) {
+            return next(err);
+        }
+        res.clearCookie('connect.sid'); // Use the default cookie name 'connect.sid'
+        // req.flash("success", "Item updated successfully.");
+        res.redirect("/login");
+    });
+});
+
+
+
+
 
 
 app.get("/error", (req, res) => {
